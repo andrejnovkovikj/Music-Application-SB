@@ -84,22 +84,29 @@ public class UserApiController {
 
     @GetMapping("/authenticated")
     @ResponseBody
-    public boolean checkAuthentication() {
+    public ResponseEntity<Boolean> checkAuthentication() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser");
-    }
-    @GetMapping("/current-user")
-    public MusicUser getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.isAuthenticated()) {
-            String username = authentication.getName();
-            MusicUser user = musicUserService.findByUsername(username);
-            return user;
+        // Check if the authentication is present and the user is authenticated
+        if (auth != null && auth.isAuthenticated() && !(auth.getPrincipal() instanceof String && "anonymousUser".equals(auth.getPrincipal()))) {
+            return ResponseEntity.ok(true);  // User is authenticated
         } else {
-            throw new RuntimeException("User is not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false); // User is not authenticated
         }
     }
+    @GetMapping("/current-user")
+    public ResponseEntity<MusicUser> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser")) {
+            String username = authentication.getName();
+            MusicUser user = musicUserService.findByUsername(username);
+            return ResponseEntity.ok(user);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
     @GetMapping("/current-user-role/{username}")
     public ResponseEntity<Boolean> isAdmin(@PathVariable String username) {
         MusicUser user = musicUserService.findByUsername(username);
