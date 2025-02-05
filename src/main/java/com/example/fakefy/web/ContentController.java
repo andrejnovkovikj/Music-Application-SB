@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@CrossOrigin(origins = {"http://localhost:3000"})
+@CrossOrigin(origins = {"https://music-application-sb-frontend.onrender.com","http://localhost:3000"})
 public class ContentController {
     private final MusicUserService musicUserService;
     public ContentController(MusicUserService musicUserService) {

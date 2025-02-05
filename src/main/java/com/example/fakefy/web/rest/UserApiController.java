@@ -16,7 +16,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = {"http://localhost:3000"})
+@CrossOrigin(origins = {"https://music-application-sb-frontend.onrender.com","http://localhost:3000"})
 public class UserApiController {
 
     private final MusicUserService musicUserService;
