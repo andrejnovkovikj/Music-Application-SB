@@ -81,7 +81,7 @@ public class PlaylistApiController {
         return ResponseEntity.ok(updatedPlaylist);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deletePlaylist(@PathVariable Long id) {
         playlistService.delete(id);
         return ResponseEntity.noContent().build();
