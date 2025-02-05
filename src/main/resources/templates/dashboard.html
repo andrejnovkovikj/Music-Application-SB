@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1>Welcome to your Dashboard!</h1>
+
+    <div class="card mt-3">
+        <div class="card-header">
+            User Information
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Hello, <span th:text="${user.username}">User</span>!</h5>
+            <p class="card-text">This is your personalized dashboard.</p>
+        </div>
+    </div>
+
+    <a href="/logout" class="btn btn-danger mt-3">Logout</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

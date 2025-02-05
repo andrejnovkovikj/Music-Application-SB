@@ -1,0 +1,28 @@
+
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User Details</title>
+</head>
+<body>
+<h1>User Details</h1>
+<p><strong>Username:</strong> <span th:text="${user.username}"></span></p>
+<p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
+
+<h2>Liked Songs</h2>
+<ul>
+    <li th:each="song : ${user.likedSongs}" th:text="${song.title}"></li>
+</ul>
+
+<h2>Playlists</h2>
+<ul>
+    <li th:each="playlist : ${user.playlists}" th:text="${playlist.name}"></li>
+</ul>
+
+<h2>Liked Albums</h2>
+<ul>
+    <li th:each="album : ${user.likedAlbums}" th:text="${album.Title}"></li>
+</ul>
+
+<a href="/">Back to Home</a>
+</body>
+</html>

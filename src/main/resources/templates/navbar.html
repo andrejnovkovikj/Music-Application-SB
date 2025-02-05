@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<nav>
+  <ul>
+    <li><a href="/albums">Home</a></li>
+    <li><a href="/songs">Songs</a></li>
+
+    <!-- If user is logged in, show username and logout -->
+    <li th:if="${username}">
+      Welcome, <span th:text="${username}"></span>!
+      <a href="/logout">Logout</a>
+    </li>
+
+    <!-- If not logged in, show login and register links -->
+    <li th:unless="${username}">
+      <a href="/login">Login</a>
+      <a href="/register">Register</a>
+    </li>
+  </ul>
+</nav>
+
+</body>
+</html>
