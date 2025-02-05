@@ -47,12 +47,11 @@ const DetailsSong = ({ isAuthenticated, currentUser }) => {
         fetchSong();
     }, [id, isAuthenticated, currentUser]);
 
-    // **Handle song delete (Fixed)**
     const handleDelete = async (songId) => {
         if (window.confirm("Are you sure you want to delete this song?")) {
             try {
-                await songService.deleteSong(songId);
-                navigate("/songs"); // Navigate back to songs list
+                await axios.delete(`https://music-application-sb.onrender.com/api/songs/delete${songId}`);
+                navigate("/songs");
             } catch (error) {
                 console.error("Error deleting song:", error);
             }

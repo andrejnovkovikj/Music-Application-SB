@@ -37,7 +37,7 @@ public class SongApiController {
         Song song = songService.findById(id);
         return song != null ? ResponseEntity.ok(song) : ResponseEntity.notFound().build();
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteSong(@PathVariable Long id){
         songService.delete(id);
         return ResponseEntity.noContent().build();

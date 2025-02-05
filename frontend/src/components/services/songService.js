@@ -43,7 +43,7 @@ const songService = {
 
     deleteSong: async (id) => {
         try {
-            await axios.delete(`https://music-application-sb.onrender.com/api/songs/delete${id}`);
+            await axios.delete(`https://music-application-sb.onrender.com/api/songs/${id}`);
         } catch (error) {
             console.error(`Error deleting song ${id}`, error);
             throw error;
