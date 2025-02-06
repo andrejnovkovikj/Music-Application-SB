@@ -103,11 +103,11 @@ const DetailsPlaylist = ({ isAuthenticated, currentUser }) => {
             <div className="mt-4">
                 <div className="card shadow-sm p-3">
                     <h3 className="text-center">Songs in this Playlist:</h3>
-                    {songs.length === 0 ? (
+                    {playlist.songs.length === 0 ? (
                         <p className="text-center">No songs available for this playlist.</p>
                     ) : (
                         <ul className="list-group">
-                            {songs.map((song) => (
+                            {playlist.songs.map((song) => (
                                 <li key={song.id} className="list-group-item d-flex align-items-center justify-content-between">
                                     <div className="d-flex align-items-center">
                                         <img

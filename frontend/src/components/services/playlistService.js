@@ -59,7 +59,33 @@ const playlistService = {
             console.error(`Error fetching playlists for user ${userId}`, error);
             throw error;
         }
+    },
+
+    addSongToPlaylist: async (playlistId, songId) => {
+        try {
+            await axios.post(
+                `https://music-application-sb.onrender.com/api/playlists/${playlistId}/${songId}/add-song-to-playlist`,
+                {},
+                { withCredentials: true }
+            );
+        } catch (error) {
+            console.error("Error adding song to playlist:", error);
+            throw error;
+        }
+    },
+
+    removeSongFromPlaylist: async (playlistId, songId) => {
+        try {
+            await axios.delete(
+                `https://music-application-sb.onrender.com/api/playlists/${playlistId}/${songId}/remove-song-from-playlist`,
+                { withCredentials: true }
+            );
+        } catch (error) {
+            console.error("Error removing song from playlist:", error);
+            throw error;
+        }
     }
+
 };
 
 export default playlistService;

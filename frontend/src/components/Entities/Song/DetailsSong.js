@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import songService from "../../services/songService";
+import playlistService from "../../services/playlistService";
 import axios from "axios";
-import { Dropdown } from "react-bootstrap";
+import { Dropdown, Modal, Button, Form } from "react-bootstrap";
 
 const DetailsSong = ({ isAuthenticated, currentUser }) => {
     const { id } = useParams();
     const [song, setSong] = useState(null);
     const [liked, setLiked] = useState(false);
+    const [playlists, setPlaylists] = useState([]);
+    const [selectedPlaylist, setSelectedPlaylist] = useState("");
+    const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const [songInPlaylists, setSongInPlaylists] = useState(new Set()); // Tracks which playlists contain the song
 
     useEffect(() => {
         const fetchSongData = async () => {
             try {
-                // Fetch song details
                 const songData = await songService.getSongById(id);
                 setSong(songData);
 
-                // Check if user is authenticated before fetching liked status
                 if (!isAuthenticated || !currentUser) {
                     setLoading(false);
                     return;
@@ -29,10 +32,20 @@ const DetailsSong = ({ isAuthenticated, currentUser }) => {
                     `https://music-application-sb.onrender.com/api/users/${currentUser.username}/liked-songs`,
                     { withCredentials: true }
                 );
+                setLiked(response.data.some((likedSong) => likedSong.id === songData.id));
 
-                // Check if this song is in the liked songs list
-                const isLiked = response.data.some((likedSong) => likedSong.id === songData.id);
-                setLiked(isLiked);
+                // Fetch user's playlists
+                const playlistsResponse = await playlistService.getPlaylistsByUserId(currentUser.username);
+                setPlaylists(playlistsResponse);
+
+                // Determine which playlists contain the song
+                const playlistsWithSong = new Set();
+                playlistsResponse.forEach((playlist) => {
+                    if (playlist.songs.some((s) => s.id === songData.id)) {
+                        playlistsWithSong.add(playlist.id);
+                    }
+                });
+                setSongInPlaylists(playlistsWithSong);
             } catch (error) {
                 console.error("Error fetching song details:", error);
             } finally {
@@ -43,53 +56,59 @@ const DetailsSong = ({ isAuthenticated, currentUser }) => {
         fetchSongData();
     }, [id, isAuthenticated, currentUser]);
 
-    // Handle song delete
-    const handleDelete = async () => {
-        if (window.confirm("Are you sure you want to delete this song?")) {
-            try {
-                await songService.deleteSong(id);
-                navigate("/songs");
-            } catch (error) {
-                console.error("Error deleting song:", error);
-            }
-        }
-    };
-
-    // Handle like action
     const handleLike = async () => {
         try {
-            await axios.post(
-                `https://music-application-sb.onrender.com/api/songs/${id}/like`,
-                {},
-                { withCredentials: true }
-            );
+            await songService.likeSong(id);
             setLiked(true);
         } catch (error) {
             console.error("Error liking the song", error);
         }
     };
 
-    // Handle unlike action
     const handleUnlike = async () => {
         try {
-            await axios.post(
-                `https://music-application-sb.onrender.com/api/songs/${id}/unlike`,
-                {},
-                { withCredentials: true }
-            );
+            await songService.unlikeSong(id);
             setLiked(false);
         } catch (error) {
             console.error("Error unliking the song", error);
         }
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    const handleAddToPlaylist = async () => {
+        if (!selectedPlaylist || songInPlaylists.has(parseInt(selectedPlaylist))) {
+            return;
+        }
 
-    if (!song) {
-        return <div>Error: Song not found</div>;
-    }
+        try {
+            await playlistService.addSongToPlaylist(selectedPlaylist, id);
+            alert("Song added to playlist!");
+
+            // Update state
+            setSongInPlaylists((prev) => new Set(prev).add(parseInt(selectedPlaylist)));
+            setShowModal(false);
+        } catch (error) {
+            console.error("Error adding song to playlist:", error);
+        }
+    };
+
+    const handleRemoveFromPlaylist = async (playlistId) => {
+        try {
+            await playlistService.removeSongFromPlaylist(playlistId, id);
+            alert("Song removed from playlist!");
+
+            // Update state
+            setSongInPlaylists((prev) => {
+                const updatedSet = new Set(prev);
+                updatedSet.delete(playlistId);
+                return updatedSet;
+            });
+        } catch (error) {
+            console.error("Error removing song from playlist:", error);
+        }
+    };
+
+    if (loading) return <div>Loading...</div>;
+    if (!song) return <div>Error: Song not found</div>;
 
     return (
         <div className="container-sm mt-5 p-4" style={{ maxWidth: "900px" }}>
@@ -111,7 +130,6 @@ const DetailsSong = ({ isAuthenticated, currentUser }) => {
                         Options
                     </Dropdown.Toggle>
                     <Dropdown.Menu>
-                        {/* Like / Unlike */}
                         {liked ? (
                             <Dropdown.Item onClick={handleUnlike}>Dislike</Dropdown.Item>
                         ) : (
@@ -120,9 +138,17 @@ const DetailsSong = ({ isAuthenticated, currentUser }) => {
 
                         <Dropdown.Divider />
 
-                        {/* Edit & Delete (if admin) */}
-                        <Dropdown.Item as={Link} to={`/songs/edit/${song.id}`}>Edit</Dropdown.Item>
-                        <Dropdown.Item onClick={handleDelete}>Delete</Dropdown.Item>
+                        {/* Add to Playlist */}
+                        <Dropdown.Item onClick={() => setShowModal(true)}>Add to Playlist</Dropdown.Item>
+
+                        {/* Remove from Playlist */}
+                        {playlists
+                            .filter((playlist) => songInPlaylists.has(playlist.id))
+                            .map((playlist) => (
+                                <Dropdown.Item key={playlist.id} onClick={() => handleRemoveFromPlaylist(playlist.id)}>
+                                    Remove from {playlist.name}
+                                </Dropdown.Item>
+                            ))}
                     </Dropdown.Menu>
                 </Dropdown>
             </div>
@@ -143,6 +169,41 @@ const DetailsSong = ({ isAuthenticated, currentUser }) => {
                     </Link>
                 </div>
             </div>
+
+            {/* Modal for selecting a playlist */}
+            <Modal show={showModal} onHide={() => setShowModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Add to Playlist</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group>
+                        <Form.Label>Select a Playlist</Form.Label>
+                        <Form.Select
+                            value={selectedPlaylist}
+                            onChange={(e) => setSelectedPlaylist(e.target.value)}
+                        >
+                            <option value="">Select a playlist...</option>
+                            {playlists.map((playlist) => (
+                                <option
+                                    key={playlist.id}
+                                    value={playlist.id}
+                                    disabled={songInPlaylists.has(playlist.id)}
+                                >
+                                    {playlist.name} {songInPlaylists.has(playlist.id) ? "(Already in)" : ""}
+                                </option>
+                            ))}
+                        </Form.Select>
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleAddToPlaylist} disabled={!selectedPlaylist || songInPlaylists.has(parseInt(selectedPlaylist))}>
+                        Add Song
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 };

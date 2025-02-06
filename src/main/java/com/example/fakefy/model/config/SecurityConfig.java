@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .formLogin(httpForm -> {
                     httpForm.loginPage("/login").permitAll();
                     httpForm.loginProcessingUrl("/login");
-                    httpForm.defaultSuccessUrl("/albums", true);
+                    httpForm.defaultSuccessUrl("http://localhost:3000/", true);
                 })
                 .logout(logout -> logout
                         .logoutUrl("/logout")

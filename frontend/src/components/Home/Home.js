@@ -49,9 +49,8 @@ const Home = () => {
             <h1 className="text-center">Welcome to the Music App</h1>
             <p className="text-center">Explore recent content:</p>
 
-            {/* Display current user */}
             {user ? (
-                <h2 className="text-center">Hello, {user.username}!</h2> // Assuming 'username' field exists
+                <h2 className="text-center">Hello, {user.username}!</h2>
             ) : (
                 <h2 className="text-center">Hello, Guest!</h2>
             )}
