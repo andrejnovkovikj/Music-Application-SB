@@ -67,7 +67,7 @@ public class UserApiController {
             MusicUser updatedUser = musicUserService.update(id, user.getUsername(), user.getEmail(), user.getPassword(), user.getRole(), user.isPremium());
             return ResponseEntity.ok(updatedUser);
         } catch (Exception e) {
-            return ResponseEntity.status(404).body(null); // User not found
+            return ResponseEntity.status(404).body(null);
         }
     }
 
@@ -87,11 +87,10 @@ public class UserApiController {
     public ResponseEntity<Boolean> checkAuthentication() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        // Check if the authentication is present and the user is authenticated
         if (auth != null && auth.isAuthenticated() && !(auth.getPrincipal() instanceof String && "anonymousUser".equals(auth.getPrincipal()))) {
-            return ResponseEntity.ok(true);  // User is authenticated
+            return ResponseEntity.ok(true);
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false); // User is not authenticated
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
         }
     }
     @GetMapping("/current-user")
@@ -111,11 +110,10 @@ public class UserApiController {
     public ResponseEntity<Boolean> isAdmin(@PathVariable String username) {
         MusicUser user = musicUserService.findByUsername(username);
         if (user != null) {
-            // Check if the user role is ADMIN
             boolean isAdmin = "ADMIN".equals(user.getRole().toString());
             return ResponseEntity.ok(isAdmin);
         } else {
-            return ResponseEntity.ok(false); // Return false if the user is not found
+            return ResponseEntity.ok(false);
         }
     }
 
@@ -145,10 +143,6 @@ public class UserApiController {
         List<Playlist> playlists = playlistService.getAllPlaylistsForUser(user.getId());
         return ResponseEntity.ok(playlists);
     }
-
-
-
-
 
 
 }

@@ -68,14 +68,12 @@ public class SongApiController {
 
     @PostMapping("/{songId}/like")
     public ResponseEntity<String> likeSong(@PathVariable Long songId) {
-        // Get the username from the SecurityContextHolder (assuming JWT authentication)
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (username == null || username.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated. Please log in.");
         }
 
-        // Like the song
         musicUserService.likeSong(username, songId);
         return ResponseEntity.ok("Song liked successfully.");
     }
@@ -88,7 +86,6 @@ public class SongApiController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated. Please log in.");
         }
 
-        // Unlike the song
         musicUserService.unlikeSong(username, songId);
         return ResponseEntity.ok("Song unliked successfully.");
     }

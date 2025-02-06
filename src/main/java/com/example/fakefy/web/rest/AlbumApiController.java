@@ -72,28 +72,24 @@ public class AlbumApiController {
     }
     @PostMapping("/{albumId}/like")
     public ResponseEntity<String> likeAlbum(@PathVariable Long albumId) {
-        // Get the username from the SecurityContextHolder (assuming JWT authentication)
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (username == null || username.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated. Please log in.");
         }
 
-        // Like the album
         musicUserService.likeAlbum(username, albumId);
         return ResponseEntity.ok("Album liked successfully.");
     }
 
     @PostMapping("/{albumId}/unlike")
     public ResponseEntity<String> unlikeAlbum(@PathVariable Long albumId) {
-        // Get the username from the SecurityContextHolder (assuming JWT authentication)
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         if (username == null || username.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated. Please log in.");
         }
 
-        // Unlike the album
         musicUserService.unlikeAlbum(username, albumId);
         return ResponseEntity.ok("Album unliked successfully.");
     }

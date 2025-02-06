@@ -41,7 +41,6 @@ public class ContentController {
         return "navbar";
     }
 
-    // Add this endpoint to check if the user is authenticated
     @GetMapping("/api/authenticated")
     @ResponseBody
     public boolean checkAuthentication() {

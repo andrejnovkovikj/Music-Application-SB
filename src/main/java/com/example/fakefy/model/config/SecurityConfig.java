@@ -40,7 +40,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Дозволи CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .formLogin(httpForm -> {
                     httpForm.loginPage("/login").permitAll();
                     httpForm.loginProcessingUrl("/login");
