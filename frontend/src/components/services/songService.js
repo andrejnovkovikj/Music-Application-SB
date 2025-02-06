@@ -43,7 +43,7 @@ const songService = {
 
     deleteSong: async (id) => {
         try {
-            await axios.delete(`https://music-application-sb.onrender.com/api/songs/${id}`);
+            await axios.delete(`https://music-application-sb.onrender.com/api/songs/delete/${id}`);
         } catch (error) {
             console.error(`Error deleting song ${id}`, error);
             throw error;
@@ -83,5 +83,4 @@ const songService = {
     }
 
 };
-
 export default songService;

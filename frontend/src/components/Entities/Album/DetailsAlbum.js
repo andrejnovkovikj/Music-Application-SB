@@ -9,18 +9,15 @@ const DetailsAlbum = ({ isAuthenticated, currentUser }) => {
     const [album, setAlbum] = useState(null);
     const [liked, setLiked] = useState(false);
     const [songs, setSongs] = useState([]);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
         const fetchAlbum = async () => {
             try {
-                // Fetch album details by ID
                 const albumData = await AlbumService.getAlbumsById(id);
                 setAlbum(albumData);
 
-                // Fetch songs from album
                 const songsResponse = await AlbumService.getSongsFromAlbum(albumData.id);
                 setSongs(songsResponse);
 
@@ -34,16 +31,8 @@ const DetailsAlbum = ({ isAuthenticated, currentUser }) => {
                     `https://music-application-sb.onrender.com/api/users/${currentUser.username}/liked-albums`,
                     { withCredentials: true }
                 );
-
                 const isLiked = response.data.some((album) => album.id === albumData.id);
                 setLiked(isLiked);
-
-                // Check if user is admin
-                const adminResponse = await axios.get(
-                    `https://music-application-sb.onrender.com/api/users/current-user-role/${currentUser.username}`,
-                    { withCredentials: true }
-                );
-                setIsAdmin(adminResponse.data);
             } catch (error) {
                 console.error("Error fetching album:", error);
             } finally {
@@ -53,6 +42,7 @@ const DetailsAlbum = ({ isAuthenticated, currentUser }) => {
 
         fetchAlbum();
     }, [id, isAuthenticated, currentUser]);
+
 
     // Handle album delete
     const handleDelete = async (id) => {
@@ -123,14 +113,6 @@ const DetailsAlbum = ({ isAuthenticated, currentUser }) => {
                     </Dropdown.Toggle>
 
                     <Dropdown.Menu>
-                        {/* Admin Options */}
-                        {isAdmin && (
-                            <>
-                                <Dropdown.Item as={Link} to={`/albums/edit/${album.id}`}>Edit</Dropdown.Item>
-                                <Dropdown.Item onClick={() => handleDelete(album.id)}>Delete</Dropdown.Item>
-                                <Dropdown.Divider />
-                            </>
-                        )}
 
                         {/* Like / Unlike */}
                         {liked ? (

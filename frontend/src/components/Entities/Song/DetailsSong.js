@@ -2,55 +2,52 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import songService from "../../services/songService";
 import axios from "axios";
-import { Dropdown, Spinner, Alert } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 
 const DetailsSong = ({ isAuthenticated, currentUser }) => {
     const { id } = useParams();
     const [song, setSong] = useState(null);
     const [liked, setLiked] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchSong = async () => {
+        const fetchSongData = async () => {
             try {
                 // Fetch song details
                 const songData = await songService.getSongById(id);
                 setSong(songData);
 
+                // Check if user is authenticated before fetching liked status
                 if (!isAuthenticated || !currentUser) {
                     setLoading(false);
                     return;
                 }
 
-                // Fetch liked songs for user
+                // Fetch liked songs for the user
                 const response = await axios.get(
                     `https://music-application-sb.onrender.com/api/users/${currentUser.username}/liked-songs`,
                     { withCredentials: true }
                 );
-                setLiked(response.data.some((song) => song.id === songData.id));
 
-                // Check if user is admin
-                const adminResponse = await axios.get(
-                    `https://music-application-sb.onrender.com/api/users/current-user-role/${currentUser.username}`,
-                    { withCredentials: true }
-                );
-                setIsAdmin(adminResponse.data);
+                // Check if this song is in the liked songs list
+                const isLiked = response.data.some((likedSong) => likedSong.id === songData.id);
+                setLiked(isLiked);
             } catch (error) {
-                console.error("Error fetching song:", error);
+                console.error("Error fetching song details:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchSong();
+        fetchSongData();
     }, [id, isAuthenticated, currentUser]);
 
-    const handleDelete = async (songId) => {
+    // Handle song delete
+    const handleDelete = async () => {
         if (window.confirm("Are you sure you want to delete this song?")) {
             try {
-                await axios.delete(`https://music-application-sb.onrender.com/api/songs/delete${songId}`);
+                await songService.deleteSong(id);
                 navigate("/songs");
             } catch (error) {
                 console.error("Error deleting song:", error);
@@ -87,59 +84,64 @@ const DetailsSong = ({ isAuthenticated, currentUser }) => {
     };
 
     if (loading) {
-        return (
-            <div className="text-center mt-5">
-                <Spinner animation="border" role="status" />
-                <p>Loading song details...</p>
-            </div>
-        );
+        return <div>Loading...</div>;
     }
 
     if (!song) {
-        return <Alert variant="danger" className="text-center mt-5">Error: Song not found</Alert>;
+        return <div>Error: Song not found</div>;
     }
 
     return (
         <div className="container-sm mt-5 p-4" style={{ maxWidth: "900px" }}>
             <h1 className="text-center">{song.title}</h1>
-            <h6 className="text-center">{song.album?.title}</h6>
+            <h6 className="text-center">by {song.artist.name}</h6>
 
             <div className="d-flex justify-content-center">
                 <img
                     className="img-fluid"
                     src={song.album.imageUrl}
-                    alt={song.title}
                     style={{ width: "200px", height: "200px", objectFit: "cover" }}
+                    alt={song.title}
                 />
             </div>
-
-            <p className="text-center">Length: {song.lengthSeconds} seconds</p>
-            <p className="text-center">Artist: {song.artist?.name}</p>
 
             <div className="d-flex justify-content-center p-3">
                 <Dropdown>
                     <Dropdown.Toggle variant="primary" id="dropdown-options">
                         Options
                     </Dropdown.Toggle>
-
                     <Dropdown.Menu>
-                        {/* Admin Options */}
-                        {isAdmin && (
-                            <>
-                                <Dropdown.Item as={Link} to={`/songs/edit/${song.id}`}>Edit</Dropdown.Item>
-                                <Dropdown.Item onClick={() => handleDelete(song.id)}>Delete</Dropdown.Item>
-                                <Dropdown.Divider />
-                            </>
-                        )}
-
                         {/* Like / Unlike */}
                         {liked ? (
                             <Dropdown.Item onClick={handleUnlike}>Dislike</Dropdown.Item>
                         ) : (
                             <Dropdown.Item onClick={handleLike}>Like</Dropdown.Item>
                         )}
+
+                        <Dropdown.Divider />
+
+                        {/* Edit & Delete (if admin) */}
+                        <Dropdown.Item as={Link} to={`/songs/edit/${song.id}`}>Edit</Dropdown.Item>
+                        <Dropdown.Item onClick={handleDelete}>Delete</Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
+            </div>
+
+            <div className="mt-4 d-flex justify-content-center">
+                <div className="card shadow-sm p-3" style={{ width: "80%" }}>
+                    <h3 className="text-center">Album: {song.album.title}</h3>
+                    <Link to={`/albums/${song.album.id}`} className="list-group-item">
+                        <div className="d-flex align-items-center">
+                            <img
+                                src={song.album.imageUrl}
+                                alt={song.album.title}
+                                className="rounded me-3"
+                                style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                            />
+                            <h5 className="mb-0">{song.album.title}</h5>
+                        </div>
+                    </Link>
+                </div>
             </div>
         </div>
     );
