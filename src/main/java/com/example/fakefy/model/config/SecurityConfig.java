@@ -44,7 +44,7 @@ public class SecurityConfig {
                 .formLogin(httpForm -> {
                     httpForm.loginPage("/login").permitAll();
                     httpForm.loginProcessingUrl("/login");
-                    httpForm.defaultSuccessUrl("http://localhost:3000/", true);
+                    httpForm.defaultSuccessUrl("https://music-application-sb-frontend.onrender.com/", true);
                 })
                 .logout(logout -> logout
                         .logoutUrl("/logout")
